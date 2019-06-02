@@ -1,0 +1,42 @@
+<?php
+if (isset($_POST['login'])) {
+	
+
+	$email = inputo(posto('email'));
+	$u_pass = inputo(posto('password'));
+	$uu_pass =md5($u_pass);
+
+	if ( isset($_POST['g-recaptcha-response']) && $_POST['g-recaptcha-response']) {
+	$captcha = $_POST['g-recaptcha-response'];
+	$rsp = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$captcha&remoteip");
+	//var_dump($rsp);
+	$arr = json_decode($rsp,TRUE);
+	if ($arr['success']) {
+		$rslt = mysql_query("SELECT * FROM user_subcribes WHERE email = '$email' and password = '$uu_pass' ");
+		if ($result = mysql_fetch_array($rslt)) {
+			$_SESSION['user_id'] = $result['id'];
+			$_SESSION['email_logged'] = $result['email'];
+			$_SESSION['password_logged'] = $result['password'];
+			$_SESSION['user_fname'] = $result['f_name'];
+			$_SESSION['pakej'] = $result['pakej'];
+			$_SESSION['upgrade'] = $result['upgrade'];
+			//header("location:index.php");
+			$errormsg = "Success loggged in!!!Redirecting... ";
+			//header( "location:review.php?page=1" );
+
+			header( "refresh:3;url=review.php?page=1");
+			//if (header( "refresh:3" )) {
+				//header( "location:review.php" );
+			//}
+		} else {
+			$errormsgsss = "Incorrect Email or Password!!!";
+			header( "refresh:3" );
+			if (header( "refresh:3" )) {
+				header("location:singin.php");
+			}
+		}
+	}
+}else { $errormsgsss = "Required captcha!!!"; }
+
+ }
+?>
